@@ -1,0 +1,44 @@
+services:
+  # --- 1. DATABASE MONGODB ---
+  arsip-mongo:
+    image: mongo:6.0
+    container_name: arsip-mongo
+    restart: always
+    # [ANALIS GUARD]: Paksa MongoDB maksimal pakai Cache 256MB (Defaultnya bisa >1GB)
+    command: mongod --wiredTigerCacheSizeGB 0.25
+    volumes:
+      - mongo_data_arsip:/data/db
+    networks:
+      - e-daily-report-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M # Hard limit RAM container Mongo
+
+  # --- 2. BACKEND NODE.JS ---
+  arsip-be:
+    build: .
+    container_name: arsip-be
+    restart: always
+    ports:
+      - "5005:5000" # Diakses dari luar (Nginx) pakai 5005
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads # Supaya foto/pdf yang diupload tidak hilang
+    networks:
+      - e-daily-report-net
+    depends_on:
+      - arsip-mongo
+    deploy:
+      resources:
+        limits:
+          memory: 512M # OCR lumayan berat, kita kasih jatah 512MB
+
+networks:
+  e-daily-report-net:
+    external: true
+    name: e-daily-report_default
+
+volumes:
+  mongo_data_arsip:
