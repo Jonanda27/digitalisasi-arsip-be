@@ -3,6 +3,9 @@ FROM node:20-slim
 
 # 1. Install Tesseract OCR & Bahasa Indonesia/Inggris (Wajib untuk fitur OCR)
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3 \
+    poppler-utils \
     tesseract-ocr \
     tesseract-ocr-ind \
     tesseract-ocr-eng \
